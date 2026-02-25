@@ -92,7 +92,11 @@ export default function FilterPage() {
     <div className="min-h-screen flex bg-gray-100">
       {/* Sidebar */}
       <aside className="w-72 bg-white shadow-md p-6 flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">
+        <h1 className="text-2xl font-semibold">
+          Frontend Assessment
+        </h1>
+        <div className="space-y-6"></div>
+        <h2 className="block text-xs font-semibold text-gray-400 mb-2 tracking-widest">
           Filter Wilayah
         </h2>
 
@@ -102,7 +106,7 @@ export default function FilterPage() {
           onChange={(e) =>
             handleChange("province", e.target.value)
           }
-          className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400 transition"
         >
           <option value="">Pilih Provinsi</option>
           {provinces.map((p) => (
@@ -119,7 +123,7 @@ export default function FilterPage() {
             handleChange("regency", e.target.value)
           }
           disabled={!selectedProvince}
-          className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+          className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:bg-gray-100 disabled:text-gray-400 transition"
         >
           <option value="">
             Pilih Kota/Kabupaten
@@ -138,7 +142,7 @@ export default function FilterPage() {
             handleChange("district", e.target.value)
           }
           disabled={!selectedRegency}
-          className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+          className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:bg-gray-100 disabled:text-gray-400 transition"
         >
           <option value="">Pilih Kecamatan</option>
           {filteredDistricts.map((d) => (
@@ -176,21 +180,36 @@ export default function FilterPage() {
     )}
 
     {selectedProvince && (
-      <h1 className="text-6xl font-bold tracking-tight">
-        {getProvinceName()}
-      </h1>
+      <div>
+            <p className="text-xs tracking-widest text-blue-400 mb-4">
+              PROVINSI
+            </p>
+            <h1 className="text-7xl font-bold text-gray-800">
+              {getProvinceName()}
+            </h1>
+          </div>
     )}
 
     {selectedRegency && (
-      <h2 className="text-3xl font-medium text-gray-700">
-        {getRegencyName()}
-      </h2>
+      <div>
+            <p className="text-xs tracking-widest text-blue-400 mb-4">
+              KOTA / KABUPATEN
+            </p>
+            <h1 className="text-6xl font-bold text-gray-800">
+              {getRegencyName()}
+            </h1>
+          </div>
     )}
 
     {selectedDistrict && (
-      <h3 className="text-xl text-gray-500">
-        {getDistrictName()}
-      </h3>
+      <div>
+            <p className="text-xs tracking-widest text-blue-400 mb-4">
+              KECAMATAN
+            </p>
+            <h1 className="text-5xl font-bold text-gray-800">
+              {getDistrictName()}
+            </h1>
+          </div>
     )}
   </div>
 

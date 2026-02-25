@@ -1,16 +1,19 @@
-# Frontend Assessment - Wilayah Filter
+# Frontend Assessment - Region Filter
 
-## Tech Stack
+## 🚀 Tech Stack
 - React
 - React Router (Data Mode)
+- TypeScript
 - Tailwind CSS
 
-## Features
+## ✨ Features
 - Dependent dropdown (Province → Regency → District)
-- State persisted via URL query params
+- Persist filter via URL search params
 - Reset filter
 - Breadcrumb navigation
-- No additional libraries used
+- Clean responsive layout
 
-## Live Demo
-(isi nanti kalau deploy)
+## 🛠️ How to Run
+```bash
+npm install
+npm run dev
