@@ -3,46 +3,52 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
-type District = {
-  id: string;
+type Province = {
+  id: number;
   name: string;
 };
 
 type Regency = {
-  id: string;
+  id: number;
+  province_id: number;
   name: string;
-  districts: District[];
 };
 
-type Province = {
-  id: string;
+type District = {
+  id: number;
+  regency_id: number;
   name: string;
-  regencies: Regency[];
 };
 
-function App() {
-  const provinces = useLoaderData() as Province[];
+export async function loader() {
+  const res = await fetch("/data/indonesia_regions.json");
+  return res.json();
+}
+
+export default function FilterPage() {
+  const { provinces, regencies, districts } = useLoaderData() as {
+    provinces: Province[];
+    regencies: Regency[];
+    districts: District[];
+  };
+
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const selectedProvinceId = searchParams.get("province") || "";
-  const selectedRegencyId = searchParams.get("regency") || "";
-  const selectedDistrictId = searchParams.get("district") || "";
+  const selectedProvince = searchParams.get("province");
+  const selectedRegency = searchParams.get("regency");
+  const selectedDistrict = searchParams.get("district");
 
-  const selectedProvince = provinces.find(
-    (p) => p.id === selectedProvinceId
-  );
+  const filteredRegencies = selectedProvince
+    ? regencies.filter(
+        (r) => r.province_id === Number(selectedProvince)
+      )
+    : [];
 
-  const regencies = selectedProvince?.regencies || [];
-
-  const selectedRegency = regencies.find(
-    (r) => r.id === selectedRegencyId
-  );
-
-  const districts = selectedRegency?.districts || [];
-
-  const selectedDistrict = districts.find(
-    (d) => d.id === selectedDistrictId
-  );
+  const filteredDistricts = selectedRegency
+    ? districts.filter(
+        (d) => d.regency_id === Number(selectedRegency)
+      )
+    : [];
 
   const handleChange = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);
@@ -65,176 +71,130 @@ function App() {
     setSearchParams(newParams);
   };
 
-  const handleReset = () => {
+  const resetFilters = () => {
     setSearchParams({});
   };
 
+  const getProvinceName = () =>
+    provinces.find((p) => p.id === Number(selectedProvince))?.name;
+
+  const getRegencyName = () =>
+    filteredRegencies.find(
+      (r) => r.id === Number(selectedRegency)
+    )?.name;
+
+  const getDistrictName = () =>
+    filteredDistricts.find(
+      (d) => d.id === Number(selectedDistrict)
+    )?.name;
+
   return (
-    <main className="min-h-screen bg-gray-50 grid grid-cols-[320px_1fr]">
+    <div className="min-h-screen flex bg-gray-100">
+      {/* Sidebar */}
+      <aside className="w-72 bg-white shadow-md p-6 flex flex-col gap-4">
+        <h2 className="text-lg font-semibold">
+          Filter Wilayah
+        </h2>
 
-      {/* SIDEBAR */}
-      <aside className="bg-white border-r p-8 space-y-8">
+        <select
+          name="province"
+          value={selectedProvince || ""}
+          onChange={(e) =>
+            handleChange("province", e.target.value)
+          }
+          className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Pilih Provinsi</option>
+          {provinces.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
 
-        <h1 className="text-xl font-semibold">
-          <span>🌍</span>
-          <span>Frontend Assessment</span>
-        </h1>
+        <select
+          name="regency"
+          value={selectedRegency || ""}
+          onChange={(e) =>
+            handleChange("regency", e.target.value)
+          }
+          disabled={!selectedProvince}
+          className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+        >
+          <option value="">
+            Pilih Kota/Kabupaten
+          </option>
+          {filteredRegencies.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name}
+            </option>
+          ))}
+        </select>
 
-        <div className="space-y-6">
-          <label className="block text-xs font-semibold text-gray-400 mb-2 tracking-widest">
-            FILTER WILAYAH
-          </label>
-          <div>
-            <label className="block font-semibold mb-2">
-              PROVINSI
-            </label>
+        <select
+          name="district"
+          value={selectedDistrict || ""}
+          onChange={(e) =>
+            handleChange("district", e.target.value)
+          }
+          disabled={!selectedRegency}
+          className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+        >
+          <option value="">Pilih Kecamatan</option>
+          {filteredDistricts.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
+        </select>
 
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                🗺️
-              </span>
-
-              <select
-                name="province"
-                value={selectedProvinceId}
-                onChange={(e) =>
-                  handleChange("province", e.target.value)
-                }
-                className="w-full border rounded-lg pl-10 pr-3 py-2 bg-white"
-              >
-                <option value="">Pilih Provinsi</option>
-                {provinces.map((province) => (
-                  <option key={province.id} value={province.id}>
-                    {province.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block font-semibold mb-2">
-              KOTA / KABUPATEN
-            </label>
-
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                🏙️
-              </span>
-
-              <select
-                name="regency"
-                value={selectedRegencyId}
-                disabled={!selectedProvince}
-                onChange={(e) =>
-                  handleChange("regency", e.target.value)
-                }
-                className="w-full border rounded-lg pl-10 pr-3 py-2 bg-white disabled:bg-gray-100"
-              >
-                <option value="">Pilih Kota/Kabupaten</option>
-                {regencies.map((regency) => (
-                  <option key={regency.id} value={regency.id}>
-                    {regency.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block font-semibold mb-2">
-              KECAMATAN
-            </label>
-
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                📍
-              </span>
-
-              <select
-                name="district"
-                value={selectedDistrictId}
-                disabled={!selectedRegency}
-                onChange={(e) =>
-                  handleChange("district", e.target.value)
-                }
-                className="w-full border rounded-lg pl-10 pr-3 py-2 bg-white disabled:bg-gray-100"
-              >
-                <option value="">Pilih Kecamatan</option>
-                {districts.map((district) => (
-                  <option key={district.id} value={district.id}>
-                    {district.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <button
-            onClick={handleReset}
-            className="w-full border-2 border-blue-500 text-blue-500 rounded-lg py-2 hover:bg-blue-50 transition flex items-center justify-center gap-2"
-          >
-            <span>🔄</span>
-            <span>RESET</span>
-          </button>
-
-        </div>
+        <button
+          onClick={resetFilters}
+          className="mt-4 bg-gray-200 hover:bg-gray-300 p-2 rounded-md transition"
+        >
+          Reset
+        </button>
       </aside>
 
-      {/* CONTENT */}
-      <section className="p-16">
+      {/* Main Content */}
+<main className="flex-1 relative flex items-center justify-center bg-gray-50">
+  
+  {/* Breadcrumb */}
+  <nav className="breadcrumb absolute top-10 text-sm text-gray-400">
+    Indonesia
+    {selectedProvince && ` > ${getProvinceName()}`}
+    {selectedRegency && ` > ${getRegencyName()}`}
+    {selectedDistrict && ` > ${getDistrictName()}`}
+  </nav>
 
-        {/* Breadcrumb */}
-        <div className="breadcrumb text-sm text-gray-400 mb-16">
-          Indonesia
-          {selectedProvince && ` > ${selectedProvince.name}`}
-          {selectedRegency && ` > ${selectedRegency.name}`}
-          {selectedDistrict && ` > ${selectedDistrict.name}`}
-        </div>
+  {/* Content Center */}
+  <div className="text-center space-y-4">
+    {!selectedProvince && (
+      <h1 className="text-5xl font-bold text-gray-300">
+        Indonesia
+      </h1>
+    )}
 
-        <div className="text-center space-y-20">
+    {selectedProvince && (
+      <h1 className="text-6xl font-bold tracking-tight">
+        {getProvinceName()}
+      </h1>
+    )}
 
-          {selectedProvince && (
-            <div>
-              <p className="text-xs tracking-widest text-blue-400 mb-4">
-                PROVINSI
-              </p>
-              <h1 className="text-7xl font-bold text-gray-800">
-                {selectedProvince.name}
-              </h1>
-            </div>
-          )}
+    {selectedRegency && (
+      <h2 className="text-3xl font-medium text-gray-700">
+        {getRegencyName()}
+      </h2>
+    )}
 
-          {selectedRegency && (
-            <div>
-              <p className="text-xs tracking-widest text-blue-400 mb-4">
-                KOTA / KABUPATEN
-              </p>
-              <h1 className="text-6xl font-bold text-gray-800">
-                {selectedRegency.name}
-              </h1>
-            </div>
-          )}
+    {selectedDistrict && (
+      <h3 className="text-xl text-gray-500">
+        {getDistrictName()}
+      </h3>
+    )}
+  </div>
 
-          {selectedDistrict && (
-            <div>
-              <p className="text-xs tracking-widest text-blue-400 mb-4">
-                KECAMATAN
-              </p>
-              <h1 className="text-5xl font-bold text-gray-800">
-                {selectedDistrict.name}
-              </h1>
-            </div>
-          )}
-
-        </div>
-
-      </section>
-
-    </main>
+</main>
+    </div>
   );
-
 }
-
-
-export default App;
