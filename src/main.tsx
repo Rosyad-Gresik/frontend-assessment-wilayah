@@ -5,7 +5,6 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import App from "./App";
-import { regions } from "./data/regions";
 import "./index.css";
 
 const router = createBrowserRouter([
@@ -13,9 +12,10 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     loader: async () => {
-      return regions;
+  const res = await fetch("/data/indonesia_regions.json");
+  return res.json();
+}
     },
-  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
